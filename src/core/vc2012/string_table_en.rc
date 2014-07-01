@@ -269,7 +269,7 @@ BEGIN
     IDS_TVP_PLUGIN_UNBOUND_FUNCTION_ERROR                                     "Plugin require %1 funcion. Bat not found function in this file."
     IDS_TVP_EXCEPTION_HAD_BEEN_OCCURED                                        " = (Exception)"
     IDS_TVP_CONSOLE_RESULT                                                    "Console : "
-    IDS_TVP_INFO_LISTING_FILES                                                "(info) Listing files in %1 Åc"
+    IDS_TVP_INFO_LISTING_FILES                                                "(info) Listing files in %1 ..."
     IDS_TVP_INFO_TOTAL_PHYSICAL_MEMORY                                        "(info) Total physical memory : %1"
     IDS_TVP_INFO_SELECTED_PROJECT_DIRECTORY                                   "(info) Selected project directory : %1"
     IDS_TVP_TOO_SMALL_EXECUTABLE_SIZE                                         "too small executable size."
