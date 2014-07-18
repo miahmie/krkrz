@@ -53,7 +53,6 @@ protected:
 	SIZE		max_size_;
 	int			border_style_;
 	bool		in_window_;
-	bool		ignore_touch_mouse_;
 
 	bool in_mode_;
 	int modal_result_;
@@ -64,9 +63,9 @@ protected:
 	static const UINT POS_CHANGE_FLAGS;
 	static const DWORD DEFAULT_EX_STYLE;
 	static const ULONG REGISTER_TOUCH_FLAG;
+	static const DWORD DEFAULT_TABLETPENSERVICE_PROPERTY;
 
 	bool left_double_click_;
-	bool left_touch_down_;
 
 	ImeControl* ime_control_;
 
@@ -135,8 +134,8 @@ protected:
 	static bool HasMenu( HWND hWnd );
 public:
 	tTVPWindow()
-	: window_handle_(NULL), created_(false), left_double_click_(false), left_touch_down_(false), ime_control_(NULL), border_style_(0), modal_result_(0),
-		in_window_(false), ignore_touch_mouse_(false), in_mode_(false), has_parent_(false) {
+	: window_handle_(NULL), created_(false), left_double_click_(false), ime_control_(NULL), border_style_(0), modal_result_(0),
+		in_window_(false), in_mode_(false), has_parent_(false) {
 		min_size_.cx = min_size_.cy = 0;
 		max_size_.cx = max_size_.cy = 0;
 	}
@@ -257,9 +256,6 @@ public:
 	void Close();
 
 	void GetClientRect( struct tTVPRect& rt );
-
-	bool GetIgnoreTouchMouse() const { return ignore_touch_mouse_; }
-	void SetIgnoreTouchMouse( bool b ) { ignore_touch_mouse_ = b; }
 
 	// メッセージハンドラ
 	virtual void OnActive( HWND preactive ) {}

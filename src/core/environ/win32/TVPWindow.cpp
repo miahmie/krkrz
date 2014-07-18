@@ -16,6 +16,8 @@
 #include "UserEvent.h"
 #include "TickCount.h"
 
+#include <TCHAR.h>
+#include <tpcshrd.h> // for MICROSOFT_TABLETPENSERVICE_PROPERTY
 
 // touch mouse message extraInfo (cf. http://msdn.microsoft.com/en-us/library/windows/desktop/ms703320(v=vs.85).aspx )
 #define MI_WP_SIGNATURE (0xFF515700)
@@ -76,40 +78,33 @@ LRESULT WINAPI tTVPWindow::Proc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		return 0;
 
 	case WM_MOUSEMOVE:
-		OnMouseMove( GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
+		if( IsTouchEvent( ::GetMessageExtraInfo() ) == false ) {
+			OnMouseMove( GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
+		}
 		return 0;
 
-	case WM_LBUTTONDOWN: {
-		bool touch = IsTouchEvent( ::GetMessageExtraInfo() );
-		if( touch == false || ignore_touch_mouse_ == false ) {
+	case WM_LBUTTONDOWN:
+		if( IsTouchEvent( ::GetMessageExtraInfo() ) == false ) {
 			left_double_click_ = false;
-			if( touch != false ) left_touch_down_ = true;
 			OnMouseDown( mbLeft, GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
 		}
 		return 0;
-	}
-	case WM_LBUTTONUP: {
-		bool touch = IsTouchEvent( ::GetMessageExtraInfo() );
-		if( touch == false || ignore_touch_mouse_ == false || left_touch_down_ != false ) {
+	case WM_LBUTTONUP:
+		if( IsTouchEvent( ::GetMessageExtraInfo() ) == false ) {
 			if( left_double_click_ == false ) {
 				OnMouseClick( mbLeft, GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
 			}
 			left_double_click_ = false;
-			if( touch != false ) left_touch_down_ = false;
 			OnMouseUp( mbLeft, GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) ); 
 		}
 		return 0;
-	}
-	case WM_LBUTTONDBLCLK: {
-		bool touch = IsTouchEvent( ::GetMessageExtraInfo() );
-		if( touch == false || ignore_touch_mouse_ == false ) {
+	case WM_LBUTTONDBLCLK:
+		if( IsTouchEvent( ::GetMessageExtraInfo() ) == false ) {
 			left_double_click_ = true;
-			if( touch != false ) left_touch_down_ = true;
 			OnMouseDoubleClick( mbLeft, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
 			OnMouseDown( mbLeft, GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
 		}
 		return 0;
-	}
 
 	case WM_RBUTTONDOWN:
 		OnMouseDown( mbRight, GetShiftState(wParam), GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) );
@@ -372,6 +367,13 @@ void tTVPWindow::OnPaint() {
 }
 const DWORD tTVPWindow::DEFAULT_EX_STYLE = WS_EX_ACCEPTFILES | WS_EX_APPWINDOW;
 const ULONG tTVPWindow::REGISTER_TOUCH_FLAG = TWF_WANTPALM|TWF_FINETOUCH;
+const DWORD tTVPWindow::DEFAULT_TABLETPENSERVICE_PROPERTY = (
+	TABLET_DISABLE_PRESSANDHOLD | // disables press and hold (right-click) gesture
+	TABLET_DISABLE_PENTAPFEEDBACK | // disables UI feedback on pen up (waves)
+	TABLET_DISABLE_PENBARRELFEEDBACK | // disables UI feedback on pen button down (circle)
+	TABLET_DISABLE_FLICKS // disables pen flicks (back, forward, drag down, drag up)
+	);
+
 HRESULT tTVPWindow::CreateWnd( const std::wstring& classname, const std::wstring& title, int width, int height, HWND hParent )
 {
 	window_class_name_ = classname;
@@ -431,8 +433,11 @@ HRESULT tTVPWindow::CreateWnd( const std::wstring& classname, const std::wstring
 		if( (value & (NID_MULTI_INPUT|NID_READY)) == (NID_MULTI_INPUT|NID_READY) ) {
 			// マルチタッチサポート & 準備できている
 			procRegisterTouchWindow( window_handle_, REGISTER_TOUCH_FLAG );
-			// タッチマウスを無視
-			SetIgnoreTouchMouse( true );
+
+			// MICROSOFT_TABLETPENSERVICE_PROPERTY プロパティを変更する
+			ATOM atom = ::GlobalAddAtom( MICROSOFT_TABLETPENSERVICE_PROPERTY );
+			::SetProp( window_handle_, MICROSOFT_TABLETPENSERVICE_PROPERTY, reinterpret_cast<HANDLE>( DEFAULT_TABLETPENSERVICE_PROPERTY ) );
+			::GlobalDeleteAtom( atom );
 		}
 	}
 	return S_OK;
