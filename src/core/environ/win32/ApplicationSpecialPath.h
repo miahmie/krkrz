@@ -4,6 +4,7 @@
 
 #include <shlobj.h>
 #include "FilePathUtil.h"
+#include "CompatibleNativeFuncs.h"
 
 class ApplicationSpecialPath {
 public:
@@ -31,11 +32,13 @@ public:
 	}
 	static inline std::wstring GetSavedGamesPath() {
 		std::wstring result;
-		PWSTR ppszPath = NULL;
-		HRESULT hr = ::SHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &ppszPath);
-		if( hr == S_OK ) {
-			result = std::wstring(ppszPath);
-			::CoTaskMemFree( ppszPath );
+		if( procSHGetKnownFolderPath ) {
+			PWSTR ppszPath = NULL;
+			HRESULT hr = procSHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &ppszPath);
+			if( hr == S_OK ) {
+				result = std::wstring(ppszPath);
+				::CoTaskMemFree( ppszPath );
+			}
 		}
 		return result;
 	}
