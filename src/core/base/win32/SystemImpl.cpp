@@ -457,11 +457,13 @@ ttstr TVPGetAppDataPath()
 ttstr TVPGetSavedGamesPath()
 {
 	ttstr path;
-	PWSTR ppszPath = NULL;
-	HRESULT hr = ::SHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &ppszPath);
-	if( hr == S_OK ) {
-		path = ppszPath;
-		::CoTaskMemFree( ppszPath );
+	if( procSHGetKnownFolderPath ) {
+		PWSTR ppszPath = NULL;
+		HRESULT hr = procSHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &ppszPath);
+		if( hr == S_OK ) {
+			path = ppszPath;
+			::CoTaskMemFree( ppszPath );
+		}
 	}
 	return path;
 }
