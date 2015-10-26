@@ -11,6 +11,8 @@
 #ifndef CompatibleNativeFuncsH
 #define CompatibleNativeFuncsH
 
+#include <shlobj.h>
+
 //---------------------------------------------------------------------------
 // macros
 //---------------------------------------------------------------------------
@@ -71,6 +73,12 @@ TVP_NATIVE_FUNC_REG(
 	BOOL, WINAPI, IsTouchWindow,
 	(HWND hWnd, PULONG pulFlags),
 	L"USER32.DLL")
+
+TVP_NATIVE_FUNC_REG(
+	HRESULT, WINAPI, SHGetKnownFolderPath,
+	(REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath),
+	L"SHELL32.DLL")
+
 /////
 //---------------------------------------------------------------------------
 #if defined(TVP_WNF_B)
